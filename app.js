@@ -1,7 +1,7 @@
 const express = require("express");
 const app = express();
 const _ = require("lodash");
-
+const port = process.env.PORT || 3001;
 const bodyParser = require("body-parser");
 
 const ejs = require("ejs");
@@ -151,6 +151,6 @@ app.post("/",function(req,res){
   }
 });
 
-app.listen(3000, function() {
+app.listen(port, function() {
   console.log("Server running at 3000 port");
 })

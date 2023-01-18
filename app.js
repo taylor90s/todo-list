@@ -11,7 +11,9 @@ const toDay = require(__dirname+"/date.js");
 
 const mongoose = require("mongoose");
 mongoose.set('strictQuery', false);
-mongoose.connect("mongodb://127.0.0.1:27017/todoListDB",function(err){
+const mongoLink = "mongodb://127.0.0.1:27017/todoListDB";
+const mongoAtlasLink = "mongodb+srv://Cluster11330:QVdeWk59UUVS@cluster11330.hoi1bgj.mongodb.net/todoListDB?retryWrites=true&w=majority"
+mongoose.connect(mongoAtlasLink,function(err){
   if(err) console.log(err);
   else console.log("Succesfully connect to MongoDB");
 });
@@ -75,23 +77,29 @@ app.get("/:customListName",function(req,res){
   console.log(customListName);
   CustomList.findOne({name:customListName},function(err,result){
     if(!err){
+      console.log(result);
       if(!result){
         const newCustomList = new CustomList({
           name:customListName,
           item: defaultItems
-        })
-        newCustomList.save();
+        });
+
+        wait2Save(newCustomList);
+
         console.log("Successfully create new collection");
         res.redirect("/"+customListName);
       }
       else{
-        //console.log(result);
+        console.log("Found existing list!");
         res.render('index',{h_day: customListName, hTaskList:result.item});
       }
     }
   })
 })
 
+async function wait2Save(newCustomList){
+  await newCustomList.save();
+}
 app.get("/about",function(req,res){
   res.render('about');
 }
@@ -127,7 +135,7 @@ app.post("/",function(req,res){
     name: req.body.task
   });
   if(listName == timeString){
-    newItem.save();
+    wait2Save(newItem);
     res.redirect("/");
   }
   else{
@@ -135,7 +143,7 @@ app.post("/",function(req,res){
       if(!err){
         if(foundList){
           foundList.item.push(newItem);
-          foundList.save();
+          wait2Save(foundList);
           res.redirect("/"+listName);
         }
       }
